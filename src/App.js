@@ -5,7 +5,9 @@ import './App.css';
 // import FormDataBuah from './Tugas-9/tugas9';
 // import TableDataBuah from './Tugas-10/tugas10';
 // import Timer from './Tugas-11/tugas11';
-import Lists from './Tugas-12/tugas12'
+// import Lists from './Tugas-12/tugas12'
+import HooksWithAxios from './Tugas-13/tugas13'
+
 
 
 function App() {
@@ -14,10 +16,11 @@ function App() {
 {/*       
       <TableDataBuah/>
       <FormDataBuah/>
-      <Timer/> */}
+      <Timer/>
+      <Lists/> */}
 
-      <Lists/>
-
+<hr></hr>
+<HooksWithAxios/>
     </div>
 
   );

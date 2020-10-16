@@ -1,147 +1,183 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, {useState, useEffect} from "react"
+import axios from "axios"
+// import "./DaftarBuah.css"
 
-const HooksWithAxios = () => {
+const DaftarBuah = () => {  
+  const [daftarBuah, setDaftarBuah] =  useState(null)
+  const [input, setInput]  =  useState({name: "", price: "", weight: 0, id: null})
 
-    const [dataBuah, setDataBuah] = useState(null);
-    const [name, setName] = useState({ name: "", id: null });
-    const [price, setPrice] = useState({ price: "", id: null });
-    const [weight, setWeight] = useState({ weight: "", id: null });
-
-useEffect(() => {
-    axios
-    .get("http://backendexample.sanbercloud.com/api/fruits")
-    .then((res) => {
-        let dataBuah = res.data;
-        setDataBuah(
-        dataBuah.map((el) => {
-            return {
-            id: el.id,
-            name: el.name,
-            price: el.price,
-            weight: el.weight,
-            };
-        })
-        );
-    });
-}, [dataBuah]);
-
-
-const inputBuah = (e) => {
-    let value = e.target.value;
-    let inputName = e.target.name;
-    setName({ ...name, [inputName]: value });
-    setPrice({ ...price, [inputName]: value });
-    setWeight({ ...weight, [inputName]: value });
-};
-
-const handleSubmit = (e) => {
-    e.preventDefault();
-    const url = "http://backendexample.sanbercloud.com/api/fruits";
-    const editUrl =
-        "http://backendexample.sanbercloud.com/api/fruits/{ID_FRUIT}";
-    const buahNama = name.name;
-    const buahHarga = price.price;
-    const buahBerat = weight.weight;
-    const buahBaru = {
-        name: buahNama,
-        price: buahHarga,
-        weight: buahBerat,
-    };
-    if (buahNama.id === null) {
-        axios.post(url, buahBaru);
-    } else {
-        axios.put(editUrl, buahBaru);
+  useEffect( () => {
+    if (daftarBuah === null){
+      axios.get(`http://backendexample.sanbercloud.com/api/fruits`)
+      .then(res => {
+        setDaftarBuah(res.data.map(el=>{ return {id: el.id, name: el.name, price: el.price, weight: el.weight }} ))
+      })
     }
-};
+  }, [daftarBuah])
+  
+  const handleDelete = (event) => {
+    let idDataBuah = parseInt(event.target.value)
 
-const handleEdit = (e) => {
-    let idBuah = parseInt(e.target.value);
-    const buahNama = name.name;
-    const buahHarga = price.price;
-    const buahBerat = weight.weight;
-    // const buahBaru = dataBuah.find((item) => item.id === idBuah);
-    setName({
-        id: idBuah,
-        name: buahNama,
-        price: buahHarga,
-        weight: buahBerat,
-    });
-};
+    // cara 1
+    // let newdaftarBuah = daftarBuah.filter(el => el.id !== idDataBuah)
+    // setDaftarBuah([...newdaftarBuah])
+    // axios.delete(`http://backendexample.sanbercloud.com/api/fruits/${idDataBuah}`)
+    // .then(res => {
+    //   console.log(res)
+    // })
 
-const handleDelete = (event) => {
-    let idBuah = parseInt(event.target.value);
-    axios
-        .delete("http://backendexample.sanbercloud.com/api/fruits/{ID_FRUIT}")
-        .then((res) => {
-        let buahDelete = dataBuah.filter((item) => item.id !== idBuah);
-        setDataBuah(buahDelete);
-    });
-};
 
-// Table
-return (
-    <div clasName="container-hooks">
-        <table className="table-hooks">
-            <thead>
-                <tr>
-                    <td>No</td>
-                    <td>Nama</td>
-                    <td>Harga</td>
-                    <td>Berat</td>
-                    <td>Aksi</td>
-                </tr>
-            </thead>
-            <tbody>
-            {dataBuah !== null &&
-            dataBuah.map((item, index) => {
-            return (
-                <tr key={index}>
+    // cara 2
+    axios.delete(`http://backendexample.sanbercloud.com/api/fruits/${idDataBuah}`)
+    .then(() => {
+      setDaftarBuah(null)
+    })
+          
+    
+  }
+  
+  const handleEdit = (event) =>{
+    // cara 1 ambil data dari daftarBuah yg di inisialisasi di awal (bukan api baru)
+    // let idDataBuah = parseInt(event.target.value)
+    // let dataBuah = daftarBuah.find(x=> x.id === idDataBuah)
+    // setInput({name: dataBuah.name, price: dataBuah.price, weight: dataBuah.weight, id: idDataBuah})
+    
+    // cara 2 ambil data dari api baru
+    let idDataBuah = parseInt(event.target.value)
+        
+    axios.get(`http://backendexample.sanbercloud.com/api/fruits/${idDataBuah}`)
+    .then(res => {
+      let dataBuah = res.data
+      setInput({name: dataBuah.name, price: dataBuah.price, weight: dataBuah.weight, id: idDataBuah})
+    })
+  
+  }
+
+  const handleChange = (event) =>{
+    let typeOfInput = event.target.name
+
+    switch (typeOfInput){
+      case "name":
+      {
+        setInput({...input, name: event.target.value});
+        break
+      }
+      case "price":
+      {
+        setInput({...input, price: event.target.value});
+        break
+      }
+      case "weight":
+      {
+        setInput({...input, weight: event.target.value});
+          break
+      }
+    default:
+      {break;}
+    }
+  }
+
+  const handleSubmit = (event) =>{
+    // menahan submit
+    event.preventDefault()
+
+    let name = input.name
+    let price = input.price.toString()
+    
+
+    if (input.id === null){        
+      axios.post(`http://backendexample.sanbercloud.com/api/fruits`, {name, price, weight: input.weight})
+      .then(res => {
+          setDaftarBuah([
+            ...daftarBuah, 
+            { id: res.data.id, 
+              name, 
+              price,
+              weight: input.weight
+            }])
+      })
+    }else{
+      axios.put(`http://backendexample.sanbercloud.com/api/fruits/${input.id}`, {name, price, weight: input.weight})
+      .then(() => {
+          let dataBuah = daftarBuah.find(el=> el.id === input.id)
+          dataBuah.name = name
+          dataBuah.price = price
+          dataBuah.weight = input.weight
+          setDaftarBuah([...daftarBuah])
+      })
+    }
+
+    // reset input form to default
+    setInput({name: "", price: "", weight: 0, id: null})
+
+  }
+
+  return(
+    <>
+      <h1>Daftar Harga Buah</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Harga</th>
+            <th>Berat</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+
+            {
+              daftarBuah !== null && daftarBuah.map((item, index)=>{
+                return(                    
+                  <tr key={index}>
                     <td>{index+1}</td>
                     <td>{item.name}</td>
                     <td>{item.price}</td>
-                    <td>{item.weight}</td>
-                <td>
-                    <button value={item.id} onClick={handleEdit}>
-                    Edit
-                    </button>
-                    <button value={item.id} onClick={handleDelete}>
-                    Delete
-                    </button>
-                </td>
-                </tr>
-            );
-            })}
-            </tbody>
-        </table>
-    
-        {/* Form */}
-        <h1 style={{textAlign:"center"}}>Form Daftar Harga Buah</h1>
-            <form onSubmit={handleSubmit} style={{border: "1px solid #aaa", padding: "20px", width: "50%", margin: "0 auto", display: "block"}} >
-                <label style={{float: "left"}}>
-                Nama:
-                </label>
-                <input style={{float: "right"}} type="text" required name="name" value={name.name} onChange={inputBuah}/>
-            <br/>
-            <br/>
-                <label style={{float: "left"}}>
-                Harga:
-                </label>
-                <input style={{float: "right"}} type="text" required name="price" value={price.price} onChange={inputBuah}/>
-            <br/>
-            <br/>
-                <label style={{float: "left"}}>
-                Berat (dalam gram):
-                </label>
-                <input style={{float: "right"}} type="number" required name="weight" value={weight.weight} onChange={inputBuah}/>
-            <br/>
-            <br/>
-                <div style={{width: "100%", paddingBottom: "20px"}}>
-                <button style={{ float: "right"}}>submit</button>
-                </div>
-            </form>
-    </div>
-);
-};
+                    <td>{item.weight/1000} Kg</td>
+                    <td>
+                      <button onClick={handleEdit} value={item.id}>Edit</button>
+                      &nbsp;
+                      <button onClick={handleDelete} value={item.id}>Delete</button>
+                    </td>
+                  </tr>
+                )
+              })
+            }
+        </tbody>
+      </table>
+      {/* Form */}
+      <h1>Form Daftar Harga Buah</h1>
 
-export default HooksWithAxios;
+      <div style={{width: "50%", margin: "0 auto", display: "block"}}>
+        <div style={{border: "1px solid #aaa", padding: "20px"}}>
+          <form onSubmit={handleSubmit}>
+            <label style={{float: "left"}}>
+              Nama:
+            </label>
+            <input style={{float: "right"}} type="text" required name="name" value={input.name} onChange={handleChange}/>
+            <br/>
+            <br/>
+            <label style={{float: "left"}}>
+              Harga:
+            </label>
+            <input style={{float: "right"}} type="text" required name="price" value={input.price} onChange={handleChange}/>
+            <br/>
+            <br/>
+            <label style={{float: "left"}}>
+              Berat (dalam gram):
+            </label>
+            <input style={{float: "right"}} type="number" required name="weight" value={input.weight} onChange={handleChange}/>
+            <br/>
+            <br/>
+            <div style={{width: "100%", paddingBottom: "20px"}}>
+              <button style={{ float: "right"}}>submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
+  )
+}
+
+export default DaftarBuah
